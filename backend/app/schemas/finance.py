@@ -6,7 +6,7 @@ from decimal import Decimal
 
 class FinancialRecordBase(BaseModel):
     student_id: UUID
-    amount: Decimal = Field(gt=0, decimal_places=2)
+    amount: Decimal = Field(gt=0)
     type: str # 'invoice' or 'payment'
     status: str = "pending" # 'pending', 'paid', 'overdue'
     due_date: date
@@ -16,7 +16,7 @@ class FinancialRecordCreate(FinancialRecordBase):
     school_id: UUID
 
 class FinancialRecordUpdate(BaseModel):
-    amount: Optional[Decimal] = Field(None, gt=0, decimal_places=2)
+    amount: Optional[Decimal] = Field(None, gt=0)
     type: Optional[str] = None
     status: Optional[str] = None
     due_date: Optional[date] = None
