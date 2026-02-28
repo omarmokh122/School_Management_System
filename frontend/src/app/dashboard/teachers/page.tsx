@@ -3,6 +3,7 @@ import { fetchApi } from "@/lib/fetchApi"
 import { createClient } from "@/lib/supabase/server"
 import { AddTeacherModal } from "./AddTeacherModal"
 import { TeacherEditModal } from "./TeacherEditModal"
+import { CreateAccountModal } from "./CreateAccountModal"
 import { redirect } from "next/navigation"
 
 export default async function TeachersPage() {
@@ -37,7 +38,11 @@ export default async function TeachersPage() {
                     {teachers.map((teacher: any) => (
                         <div key={teacher.id} className="card p-5 flex flex-col gap-4 relative group">
                             {/* Edit button */}
-                            <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute top-4 left-4 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <CreateAccountModal
+                                    teacherId={teacher.id}
+                                    teacherName={`${teacher.first_name} ${teacher.last_name}`}
+                                />
                                 <TeacherEditModal teacher={teacher} />
                             </div>
 
