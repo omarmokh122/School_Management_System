@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil, X, Camera } from 'lucide-react'
+import { updateTeacher } from './actions'
 
 const inputCls = "mt-1 block w-full rounded-lg border border-slate-200 py-2.5 px-3 text-sm text-slate-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none bg-white"
 
@@ -17,18 +18,7 @@ interface Teacher {
     avatar_url?: string
 }
 
-async function updateTeacher(id: string, payload: any) {
-    const res = await fetch(`/api/teachers/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.detail || 'Error updating teacher')
-    }
-    return res.json()
-}
+
 
 export function TeacherEditModal({ teacher }: { teacher: Teacher }) {
     const [isOpen, setIsOpen] = useState(false)
@@ -54,13 +44,13 @@ export function TeacherEditModal({ teacher }: { teacher: Teacher }) {
         }
 
         try {
-            const { fetchApi } = await import('@/lib/fetchApi')
-            await fetchApi(`/teachers/${teacher.id}`, {
-                method: 'PUT',
-                body: JSON.stringify(payload)
-            })
-            router.refresh()
-            setIsOpen(false)
+            const result = await updateTeacher(teacher.id, payload)
+            if (!result.success) {
+                setError(result.error)
+            } else {
+                router.refresh()
+                setIsOpen(false)
+            }
         } catch (err: any) {
             setError(err.message || 'حدث خطأ أثناء التعديل')
         } finally {
