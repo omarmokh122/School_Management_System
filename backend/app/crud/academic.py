@@ -2,7 +2,10 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from app.models.academic import Class, ClassEnrollment, Curriculum, Assessment, Grade
+from app.models.teacher import Teacher
+from app.models.user import User
 from app.schemas.academic import ClassCreate, CurriculumCreate, AssessmentCreate, GradeCreate
 
 class CRUDAcademic:
@@ -20,6 +23,40 @@ class CRUDAcademic:
             select(Class).filter(Class.school_id == school_id, Class.teacher_id == teacher_id)
         )
         return list(result.scalars().all())
+
+    async def get_classes_matrix(self, db: AsyncSession, school_id: UUID):
+        stmt = (
+            select(
+                Class.id,
+                Class.name,
+                Class.school_id,
+                Class.teacher_id,
+                Class.created_at,
+                User.full_name.label("teacher_name"),
+                func.count(ClassEnrollment.student_id).label("students_count")
+            )
+            .select_from(Class)
+            .outerjoin(Teacher, Class.teacher_id == Teacher.id)
+            .outerjoin(User, Teacher.user_id == User.id)
+            .outerjoin(ClassEnrollment, Class.id == ClassEnrollment.class_id)
+            .filter(Class.school_id == school_id)
+            .group_by(Class.id, User.full_name)
+        )
+        result = await db.execute(stmt)
+        rows = result.all()
+        
+        return [
+            {
+                "id": row.id,
+                "name": row.name,
+                "school_id": row.school_id,
+                "teacher_id": row.teacher_id,
+                "created_at": row.created_at,
+                "teacher_name": row.teacher_name or "غير محدد",
+                "students_count": row.students_count
+            }
+            for row in rows
+        ]
 
     # -- Enrollments --
     async def enroll_students(self, db: AsyncSession, school_id: UUID, class_id: UUID, student_ids: List[UUID]):

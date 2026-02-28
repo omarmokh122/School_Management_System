@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     SUPABASE_SERVICE_ROLE_KEY: str = ""
     SUPABASE_JWT_SECRET: str = ""
     
+    # AI Settings
+    OPENAI_API_KEY: str = ""
+    
     # DB Settings
     DATABASE_URL: str = ""
 

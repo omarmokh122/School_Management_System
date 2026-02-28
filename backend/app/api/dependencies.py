@@ -38,11 +38,12 @@ def get_current_tenant(current_user: dict = Depends(get_current_user)) -> str:
 def require_role(allowed_roles: list[str]):
     """
     Dependency factory to check if the current user has one of the allowed roles.
+    SuperAdmin is implicitly allowed for all restricted routes.
     """
     def role_checker(current_user: dict = Depends(get_current_user)):
         user_meta = current_user.get("user_metadata", {})
         role = user_meta.get("role", "Student") # Default fallback
-        if role not in allowed_roles:
+        if role != "SuperAdmin" and role not in allowed_roles:
             raise HTTPException(status_code=403, detail="Not enough permissions")
         return current_user
     return role_checker

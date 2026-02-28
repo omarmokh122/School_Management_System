@@ -29,6 +29,19 @@ async def create_class(
         raise HTTPException(status_code=403, detail="Cross-tenant request blocked")
     return await crud_academic.create_class(db, obj_in=class_in)
 
+@router.get("/classes/matrix", response_model=List[schemas.ClassMatrixResponse])
+async def get_classes_matrix(
+    db: AsyncSession = Depends(get_db),
+    school_id: str = Depends(dependencies.get_current_tenant),
+    _ = Depends(dependencies.require_role(["Admin"]))
+):
+    """
+    Get the master matrix of all classes for the school manager.
+    Includes teacher names and student enrollment counts.
+    """
+    tenant_uuid = validate_school_id(school_id)
+    return await crud_academic.get_classes_matrix(db, school_id=tenant_uuid)
+
 @router.get("/classes/teacher/{teacher_id}", response_model=List[schemas.ClassResponse])
 async def get_teacher_classes(
     teacher_id: UUID,

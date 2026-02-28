@@ -20,6 +20,10 @@ class ClassResponse(ClassBase):
     class Config:
         from_attributes = True
 
+class ClassMatrixResponse(ClassResponse):
+    teacher_name: Optional[str] = None
+    students_count: int = 0
+
 # -- Enrollments --
 class EnrollmentCreate(BaseModel):
     school_id: UUID
