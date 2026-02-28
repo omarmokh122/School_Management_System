@@ -32,7 +32,7 @@ class CRUDAcademic:
                 Class.school_id,
                 Class.teacher_id,
                 Class.created_at,
-                User.full_name.label("teacher_name"),
+                func.concat(Teacher.first_name, ' ', Teacher.last_name).label("teacher_name"),
                 func.count(ClassEnrollment.student_id).label("students_count")
             )
             .select_from(Class)
@@ -40,7 +40,7 @@ class CRUDAcademic:
             .outerjoin(User, Teacher.user_id == User.id)
             .outerjoin(ClassEnrollment, Class.id == ClassEnrollment.class_id)
             .filter(Class.school_id == school_id)
-            .group_by(Class.id, User.full_name)
+            .group_by(Class.id, Teacher.first_name, Teacher.last_name)
         )
         result = await db.execute(stmt)
         rows = result.all()

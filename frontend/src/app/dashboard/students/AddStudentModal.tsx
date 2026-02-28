@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, X } from 'lucide-react'
 import { createStudent } from './actions'
 
-export function AddStudentModal() {
+export function AddStudentModal({ schoolId }: { schoolId: string }) {
     const [isOpen, setIsOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
@@ -28,8 +28,11 @@ export function AddStudentModal() {
             last_name: formData.get('last_name'),
             grade: formData.get('grade') || null,
             section: formData.get('section') || null,
+            date_of_birth: formData.get('date_of_birth') || null,
+            email: formData.get('email') || null,
+            phone: formData.get('phone') || null,
             enrollment_date: formData.get('enrollment_date') || null,
-            school_id: '00000000-0000-0000-0000-000000000000' // The backend automatically overrides this via tenant token extraction, but pydantic schema still checks for it blindly
+            school_id: schoolId
         }
 
         try {
@@ -37,7 +40,7 @@ export function AddStudentModal() {
             if (!result.success) {
                 setError(result.error)
             } else {
-                router.refresh() // Refresh the server component to load new data
+                router.refresh()
                 closeModal()
             }
         } catch (err: any) {
@@ -59,19 +62,20 @@ export function AddStudentModal() {
 
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden relative" dir="rtl">
+                    <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden relative" dir="rtl">
                         <div className="flex justify-between items-center p-6 border-b border-slate-100">
                             <h3 className="text-xl font-semibold text-slate-900">إضافة طالب جديد</h3>
                             <button onClick={closeModal} className="text-slate-400 hover:text-slate-600 transition-colors">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                             {error && (
                                 <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
                                     {error}
                                 </div>
                             )}
+                            {/* Row 1: Name */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-1">الاسم الأول *</label>
@@ -82,9 +86,21 @@ export function AddStudentModal() {
                                     <input required type="text" name="last_name" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
                                 </div>
                             </div>
+                            {/* Row 2: Contact */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">الصف</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">البريد الإلكتروني</label>
+                                    <input type="email" name="email" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">رقم الهاتف</label>
+                                    <input type="text" name="phone" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
+                                </div>
+                            </div>
+                            {/* Row 3: Grade & Section */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">الصف الدراسي</label>
                                     <input type="text" name="grade" placeholder="مثل: العاشر" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
                                 </div>
                                 <div>
@@ -92,9 +108,16 @@ export function AddStudentModal() {
                                     <input type="text" name="section" placeholder="مثل: أ" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">تاريخ التسجيل</label>
-                                <input type="date" name="enrollment_date" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
+                            {/* Row 4: Dates */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">تاريخ الميلاد</label>
+                                    <input type="date" name="date_of_birth" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">تاريخ التسجيل</label>
+                                    <input type="date" name="enrollment_date" className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none" />
+                                </div>
                             </div>
                             <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
                                 <button type="button" onClick={closeModal} className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">

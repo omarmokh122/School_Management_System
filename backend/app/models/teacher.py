@@ -12,3 +12,8 @@ class Teacher(Base, TimestampMixin):
     
     specialization = Column(String, nullable=False)
     hire_date = Column(Date, nullable=True)
+
+    first_name = Column(String, nullable=False, default="")
+    last_name = Column(String, nullable=False, default="")
+    email = Column(String, nullable=True)
+    phone = Column(String, nullable=True)

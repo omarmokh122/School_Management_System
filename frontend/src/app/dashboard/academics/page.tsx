@@ -27,8 +27,8 @@ export default async function AcademicsPage() {
             // Restricted Teacher View
             classes = await fetchApi(`/classes/teacher/${user.id}`) || []
         }
-    } catch (e) {
-        console.error("Failed to fetch classes:", e)
+    } catch (e: any) {
+        console.error("Failed to fetch classes:", e?.message || e)
     }
     return (
         <div className="space-y-8">

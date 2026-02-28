@@ -9,6 +9,9 @@ class StudentBase(BaseModel):
     grade: Optional[str] = None
     section: Optional[str] = None
     enrollment_date: Optional[date] = None
+    date_of_birth: Optional[date] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
 
 class StudentCreate(StudentBase):
     school_id: UUID
@@ -19,6 +22,9 @@ class StudentUpdate(BaseModel):
     last_name: Optional[str] = None
     grade: Optional[str] = None
     section: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    date_of_birth: Optional[date] = None
 
 class StudentResponse(StudentBase):
     id: UUID

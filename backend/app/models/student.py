@@ -16,3 +16,6 @@ class Student(Base, TimestampMixin):
     grade = Column(String, nullable=True)
     section = Column(String, nullable=True)
     enrollment_date = Column(Date, nullable=True)
+    date_of_birth = Column(Date, nullable=True)
+    email = Column(String, nullable=True)
+    phone = Column(String, nullable=True)

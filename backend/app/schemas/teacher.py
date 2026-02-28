@@ -4,6 +4,10 @@ from uuid import UUID
 from datetime import date, datetime
 
 class TeacherBase(BaseModel):
+    first_name: str
+    last_name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
     specialization: str
     hire_date: Optional[date] = None
 

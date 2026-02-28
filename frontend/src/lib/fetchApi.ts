@@ -22,17 +22,17 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
             headers,
         })
 
-        // If response is not JSON (e.g., 204 No Content text), catch and return null gracefully
-        let data;
-        try {
-            data = await res.json()
-        } catch (e) {
-            if (!res.ok) {
-                // Return text if JSON fails on a bad response
-                const text = await res.text().catch(() => '')
-                throw new Error(`API Error ${res.status}: ${text}`)
+        const text = await res.text()
+        let data = null
+
+        if (text) {
+            try {
+                data = JSON.parse(text)
+            } catch (e) {
+                if (!res.ok) {
+                    throw new Error(`API Error ${res.status}: ${text}`)
+                }
             }
-            return null
         }
 
         if (!res.ok) {
