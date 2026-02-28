@@ -3,7 +3,8 @@ import { fetchApi } from "@/lib/fetchApi"
 import { redirect } from "next/navigation"
 import { AddStudentModal } from "./AddStudentModal"
 import { StudentEditModal } from "./StudentEditModal"
-import { Search, Download, Users } from "lucide-react"
+import Link from "next/link"
+import { Search, Download, Users, Eye } from "lucide-react"
 
 export default async function StudentsPage() {
     const supabase = await createClient()
@@ -126,7 +127,17 @@ export default async function StudentsPage() {
                                         <td style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{student.phone || '—'}</td>
                                         <td style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{student.enrollment_date || '—'}</td>
                                         <td>
-                                            <StudentEditModal student={student} />
+                                            <div className="flex items-center gap-2">
+                                                <Link
+                                                    href={`/dashboard/students/${student.id}`}
+                                                    className="flex items-center gap-1.5 text-xs font-medium"
+                                                    style={{ color: 'var(--blue-primary)', textDecoration: 'none' }}
+                                                >
+                                                    <Eye className="h-3.5 w-3.5" />
+                                                    عرض
+                                                </Link>
+                                                <StudentEditModal student={student} />
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

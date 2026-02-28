@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import {
     LayoutDashboard, Users, GraduationCap, Wallet,
     BookOpen, Settings, LogOut, Sparkles, School, ChevronLeft,
-    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar
+    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar, FileBarChart
 } from "lucide-react"
 
 const SECTIONS = [
@@ -33,6 +33,7 @@ const SECTIONS = [
         items: [
             { name: "أدوات المدير", href: "/dashboard/manager-tools", icon: Sparkles },
             { name: "المالية", href: "/dashboard/finance", icon: Wallet },
+            { name: "التقارير", href: "/dashboard/reports", icon: FileBarChart },
             { name: "الإعدادات", href: "/dashboard/settings", icon: Settings },
         ]
     },
