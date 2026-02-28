@@ -8,6 +8,7 @@ class Class(Base, TimestampMixin):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     school_id = Column(UUID(as_uuid=True), ForeignKey("schools.id"), nullable=False, index=True)
     name = Column(String, nullable=False)
+    subject = Column(String, nullable=True)  # Math, English, Arabic, Science, etc.
     teacher_id = Column(UUID(as_uuid=True), ForeignKey("teachers.id"), nullable=False, index=True)
 
 class ClassEnrollment(Base, TimestampMixin):

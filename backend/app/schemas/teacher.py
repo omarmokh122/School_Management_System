@@ -10,6 +10,7 @@ class TeacherBase(BaseModel):
     phone: Optional[str] = None
     specialization: str
     hire_date: Optional[date] = None
+    avatar_url: Optional[str] = None
 
 class TeacherCreate(TeacherBase):
     school_id: UUID

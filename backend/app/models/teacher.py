@@ -17,3 +17,4 @@ class Teacher(Base, TimestampMixin):
     last_name = Column(String, nullable=False, default="")
     email = Column(String, nullable=True)
     phone = Column(String, nullable=True)
+    avatar_url = Column(String, nullable=True)

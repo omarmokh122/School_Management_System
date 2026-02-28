@@ -7,6 +7,7 @@ from decimal import Decimal
 # -- Classes --
 class ClassBase(BaseModel):
     name: str
+    subject: Optional[str] = None
 
 class ClassCreate(ClassBase):
     school_id: UUID
