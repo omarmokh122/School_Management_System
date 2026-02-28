@@ -318,3 +318,33 @@ body {
   border-top: 1px solid #F3F4F6;
   background: #FAFAFA;
 }
+
+/* ── Print styles ── */
+@media print {
+
+  .no-print,
+  aside,
+  nav,
+  header {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}

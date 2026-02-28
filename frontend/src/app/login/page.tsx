@@ -95,6 +95,12 @@ export default async function Page({
                             </button>
                         </div>
                     </form>
+                    <p className="mt-6 text-center text-sm" style={{ color: '#6B7280' }}>
+                        مدرسة جديدة؟{' '}
+                        <a href="/register" style={{ color: '#0056D2', fontWeight: 700, textDecoration: 'none' }}>
+                            سجّل مدرستك مجاناً
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>

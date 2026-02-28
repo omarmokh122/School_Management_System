@@ -1,9 +1,10 @@
 'use client'
 
-import { ArrowRight, User, CheckCircle2, XCircle, Clock, AlertCircle, CreditCard, BookOpen, Calendar } from 'lucide-react'
+import { ArrowRight, CheckCircle2, XCircle, Clock, AlertCircle, CreditCard, BookOpen, Calendar } from 'lucide-react'
 import Link from 'next/link'
+import { PrintReportCard } from './PrintReportCard'
 
-const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
     present: { label: 'حاضر', color: '#059669', bg: '#F0FDF4', icon: CheckCircle2 },
     absent: { label: 'غائب', color: '#DC2626', bg: '#FEF2F2', icon: XCircle },
@@ -26,11 +27,14 @@ export function StudentProfile({ student, attendance, finance, schoolId }: Props
 
     return (
         <div className="space-y-5 page-enter">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                <Link href="/dashboard/students" className="hover:underline" style={{ color: 'var(--blue-primary)' }}>الطلاب</Link>
-                <ArrowRight className="h-3.5 w-3.5 rotate-180" />
-                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{student.first_name} {student.last_name}</span>
+            {/* Breadcrumb + Print */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+                    <Link href="/dashboard/students" className="hover:underline" style={{ color: 'var(--blue-primary)' }}>الطلاب</Link>
+                    <ArrowRight className="h-3.5 w-3.5 rotate-180" />
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{student.first_name} {student.last_name}</span>
+                </div>
+                <PrintReportCard student={student} attendance={attendance} finance={finance} />
             </div>
 
             {/* Hero Card */}
