@@ -1,103 +1,139 @@
-import { Search } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { fetchApi } from "@/lib/fetchApi"
 import { redirect } from "next/navigation"
 import { AddStudentModal } from "./AddStudentModal"
 import { StudentEditModal } from "./StudentEditModal"
+import { Search, Download, Users } from "lucide-react"
 
 export default async function StudentsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) redirect('/login')
 
     const schoolId = user?.user_metadata?.school_id || '00000000-0000-0000-0000-000000000000'
-    let students = []
+    let students: any[] = []
+    try { students = await fetchApi('/students/') || [] } catch (e: any) { console.error(e?.message) }
 
-    try {
-        students = await fetchApi('/students/') || []
-    } catch (e: any) {
-        console.error("Failed to load students:", e?.message || e)
-    }
+    const gradeGroups = students.reduce((acc: Record<string, number>, s: any) => {
+        const g = s.grade || 'غير محدد'
+        acc[g] = (acc[g] || 0) + 1
+        return acc
+    }, {})
 
     return (
-        <div className="space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-5 page-enter">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900">الطلاب</h2>
-                    <p className="text-sm text-slate-500 mt-0.5">إدارة سجلات الطلاب — {students.length} طالب مسجل</p>
+                    <h1 className="section-title">الطلاب</h1>
+                    <p className="section-sub">{students.length} طالب مسجل في النظام</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                    <button className="btn-secondary gap-1.5">
+                        <Download className="h-4 w-4" />
                         تصدير
                     </button>
                     <AddStudentModal schoolId={schoolId} />
                 </div>
             </div>
 
-            <div className="rounded-2xl bg-white shadow-sm border border-slate-100 overflow-hidden">
-                {/* Search bar */}
-                <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
-                    <div className="relative flex-1 max-w-xs">
-                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="card p-4 text-center">
+                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--blue-primary)' }}>{students.length}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>إجمالي الطلاب</p>
+                </div>
+                <div className="card p-4 text-center">
+                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#059669' }}>{Object.keys(gradeGroups).length}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>صف دراسي</p>
+                </div>
+                <div className="card p-4 text-center">
+                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#7C3AED' }}>{students.filter((s: any) => s.email).length}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>لديهم بريد إلكتروني</p>
+                </div>
+                <div className="card p-4 text-center">
+                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#D97706' }}>{students.filter((s: any) => s.enrollment_date).length}</p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>محدد تاريخ تسجيل</p>
+                </div>
+            </div>
+
+            {/* Table Card */}
+            <div className="card overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <div className="relative max-w-xs w-full">
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: 'var(--text-subtle)' }} />
                         <input
                             type="text"
-                            placeholder="البحث..."
-                            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 pr-9 pl-4 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none"
+                            placeholder="البحث في الطلاب..."
+                            className="form-input"
+                            style={{ paddingRight: '2.5rem' }}
                         />
+                    </div>
+                    <div className="flex items-center gap-2 mr-auto">
+                        <span className="badge badge-blue">
+                            <Users className="h-3 w-3 ml-1 inline" />
+                            {students.length} طالب
+                        </span>
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-100 text-right text-sm">
-                        <thead>
-                            <tr className="bg-slate-50">
-                                <th className="py-3 pr-4 pl-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">الطالب</th>
-                                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">الصف</th>
-                                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">الشعبة</th>
-                                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">البريد الإلكتروني</th>
-                                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">الهاتف</th>
-                                <th className="px-3 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">تاريخ التسجيل</th>
-                                <th className="relative py-3 pl-4 pr-3"><span className="sr-only">إجراءات</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
-                            {students.length === 0 ? (
+                {students.length === 0 ? (
+                    <div className="py-20 text-center">
+                        <div className="h-16 w-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: '#EFF6FF' }}>
+                            <Users className="h-8 w-8" style={{ color: 'var(--blue-primary)' }} />
+                        </div>
+                        <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>لا يوجد طلاب بعد</p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginTop: 4 }}>ابدأ بإضافة طالب جديد</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="data-table">
+                            <thead>
                                 <tr>
-                                    <td colSpan={7} className="text-center py-14 text-slate-400">
-                                        <div className="text-4xl mb-2">👨‍🎓</div>
-                                        <p className="text-sm">لا يوجد طلاب مسجلون حتى الآن.</p>
-                                    </td>
+                                    <th>الطالب</th>
+                                    <th>الصف</th>
+                                    <th>الشعبة</th>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>الهاتف</th>
+                                    <th>تاريخ التسجيل</th>
+                                    <th></th>
                                 </tr>
-                            ) : null}
-                            {students.map((student: any) => (
-                                <tr key={student.id} className="hover:bg-blue-50/30 transition-colors">
-                                    <td className="whitespace-nowrap py-3 pr-4 pl-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
-                                                {student.first_name?.[0]}{student.last_name?.[0]}
+                            </thead>
+                            <tbody>
+                                {students.map((student: any) => (
+                                    <tr key={student.id}>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                                                    style={{ background: 'var(--blue-primary)' }}
+                                                >
+                                                    {student.first_name?.[0]}{student.last_name?.[0]}
+                                                </div>
+                                                <div>
+                                                    <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.875rem' }}>{student.first_name} {student.last_name}</p>
+                                                </div>
                                             </div>
-                                            <span className="font-medium text-slate-900">{student.first_name} {student.last_name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-3 text-slate-500">{student.grade || '—'}</td>
-                                    <td className="whitespace-nowrap px-3 py-3">
-                                        {student.section ? (
-                                            <span className="inline-block px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">{student.section}</span>
-                                        ) : '—'}
-                                    </td>
-                                    <td className="whitespace-nowrap px-3 py-3 text-slate-500">{student.email || '—'}</td>
-                                    <td className="whitespace-nowrap px-3 py-3 text-slate-500">{student.phone || '—'}</td>
-                                    <td className="whitespace-nowrap px-3 py-3 text-slate-500">{student.enrollment_date || '—'}</td>
-                                    <td className="whitespace-nowrap py-3 pl-4 pr-3 text-left">
-                                        <StudentEditModal student={student} />
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                        </td>
+                                        <td style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{student.grade || '—'}</td>
+                                        <td>
+                                            {student.section
+                                                ? <span className="badge badge-blue">شعبة {student.section}</span>
+                                                : <span style={{ color: 'var(--text-subtle)' }}>—</span>
+                                            }
+                                        </td>
+                                        <td style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{student.email || '—'}</td>
+                                        <td style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{student.phone || '—'}</td>
+                                        <td style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>{student.enrollment_date || '—'}</td>
+                                        <td>
+                                            <StudentEditModal student={student} />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     )

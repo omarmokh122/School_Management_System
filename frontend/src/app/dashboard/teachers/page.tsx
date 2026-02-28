@@ -1,4 +1,4 @@
-import { Mail, Phone } from "lucide-react"
+import { Mail, Phone, GraduationCap } from "lucide-react"
 import { fetchApi } from "@/lib/fetchApi"
 import { createClient } from "@/lib/supabase/server"
 import { AddTeacherModal } from "./AddTeacherModal"
@@ -8,91 +8,98 @@ import { redirect } from "next/navigation"
 export default async function TeachersPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) redirect('/login')
 
     const schoolId = user?.user_metadata?.school_id || '00000000-0000-0000-0000-000000000000'
-    let teachers = []
-
-    try {
-        teachers = await fetchApi('/teachers/') || []
-    } catch (e: any) {
-        console.error("Failed to load teachers:", e?.message || e)
-    }
+    let teachers: any[] = []
+    try { teachers = await fetchApi('/teachers/') || [] } catch (e: any) { console.error(e?.message) }
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-5 page-enter">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900">المعلمون</h2>
-                    <p className="text-sm text-slate-500 mt-0.5">إدارة الطاقم التدريسي في المدرسة</p>
+                    <h1 className="section-title">المعلمون</h1>
+                    <p className="section-sub">{teachers.length} معلم في الهيئة التدريسية</p>
                 </div>
                 <AddTeacherModal schoolId={schoolId} />
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {teachers.length === 0 ? (
-                    <div className="col-span-full text-center py-16 text-slate-400">
-                        <div className="text-5xl mb-3">👨‍🏫</div>
-                        <p className="text-sm">لا يوجد معلمون مسجلون بعد.</p>
+            {teachers.length === 0 ? (
+                <div className="card py-20 text-center">
+                    <div className="h-16 w-16 rounded-2xl mx-auto mb-4 flex items-center justify-center" style={{ background: '#EFF6FF' }}>
+                        <GraduationCap className="h-8 w-8" style={{ color: 'var(--blue-primary)' }} />
                     </div>
-                ) : null}
-                {teachers.map((teacher: any) => (
-                    <div key={teacher.id} className="relative flex flex-col rounded-2xl bg-white p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-100 transition-all">
-                        {/* Edit button */}
-                        <div className="absolute top-4 left-4">
-                            <TeacherEditModal teacher={teacher} />
-                        </div>
-
-                        {/* Avatar */}
-                        <div className="flex flex-col items-center gap-3 pb-4 border-b border-slate-100">
-                            {teacher.avatar_url ? (
-                                <img
-                                    src={teacher.avatar_url}
-                                    alt={`${teacher.first_name} ${teacher.last_name}`}
-                                    className="h-20 w-20 rounded-full object-cover border-2 border-blue-100 shadow-sm"
-                                />
-                            ) : (
-                                <div className="h-20 w-20 rounded-full bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-blue-700 text-2xl font-bold">
-                                    {teacher.first_name?.[0] || '؟'}{teacher.last_name?.[0] || ''}
-                                </div>
-                            )}
-                            <div className="text-center">
-                                <h3 className="text-base font-semibold text-slate-900">{teacher.first_name} {teacher.last_name}</h3>
-                                <span className="mt-1 inline-block px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
-                                    {teacher.specialization || 'بدون تخصص'}
-                                </span>
+                    <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>لا يوجد معلمون مسجلون بعد</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginTop: 4 }}>ابدأ بإضافة معلم جديد</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {teachers.map((teacher: any) => (
+                        <div key={teacher.id} className="card p-5 flex flex-col gap-4 relative group">
+                            {/* Edit button */}
+                            <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <TeacherEditModal teacher={teacher} />
                             </div>
-                        </div>
 
-                        {/* Contact */}
-                        <div className="flex-1 pt-3 space-y-2">
-                            {teacher.email && (
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Mail className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                                    <span className="truncate">{teacher.email}</span>
+                            {/* Avatar */}
+                            <div className="flex flex-col items-center gap-3 pb-4" style={{ borderBottom: '1px solid #F3F4F6' }}>
+                                {teacher.avatar_url ? (
+                                    <img
+                                        src={teacher.avatar_url}
+                                        alt=""
+                                        className="h-20 w-20 rounded-full object-cover"
+                                        style={{ border: '3px solid #EFF6FF' }}
+                                    />
+                                ) : (
+                                    <div
+                                        className="h-20 w-20 rounded-full flex items-center justify-center text-white"
+                                        style={{
+                                            background: 'linear-gradient(135deg, var(--blue-primary), #7C3AED)',
+                                            fontSize: '1.25rem',
+                                            fontWeight: 800,
+                                        }}
+                                    >
+                                        {teacher.first_name?.[0]}{teacher.last_name?.[0]}
+                                    </div>
+                                )}
+                                <div className="text-center">
+                                    <p style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: '0.9375rem' }}>
+                                        {teacher.first_name} {teacher.last_name}
+                                    </p>
+                                    <span className="badge badge-blue mt-1">{teacher.specialization || 'بدون تخصص'}</span>
                                 </div>
-                            )}
-                            {teacher.phone && (
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Phone className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
-                                    <span>{teacher.phone}</span>
-                                </div>
-                            )}
-                            {!teacher.email && !teacher.phone && (
-                                <p className="text-xs text-slate-400 text-center py-2">لا توجد بيانات تواصل</p>
-                            )}
-                        </div>
-
-                        {/* Footer */}
-                        {teacher.hire_date && (
-                            <div className="mt-3 pt-3 border-t border-slate-100 text-center">
-                                <span className="text-xs text-slate-400">تعيين {teacher.hire_date.split('-')[0]}</span>
                             </div>
-                        )}
-                    </div>
-                ))}
-            </div>
+
+                            {/* Contact */}
+                            <div className="space-y-2">
+                                {teacher.email && (
+                                    <div className="flex items-center gap-2.5" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                                        <Mail className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--text-subtle)' }} />
+                                        <span className="truncate">{teacher.email}</span>
+                                    </div>
+                                )}
+                                {teacher.phone && (
+                                    <div className="flex items-center gap-2.5" style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                                        <Phone className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--text-subtle)' }} />
+                                        <span>{teacher.phone}</span>
+                                    </div>
+                                )}
+                                {!teacher.email && !teacher.phone && (
+                                    <p style={{ color: 'var(--text-subtle)', fontSize: '0.75rem', textAlign: 'center' }}>لا توجد بيانات تواصل</p>
+                                )}
+                            </div>
+
+                            {teacher.hire_date && (
+                                <div style={{ paddingTop: '0.75rem', borderTop: '1px solid #F3F4F6', textAlign: 'center' }}>
+                                    <span style={{ fontSize: '0.6875rem', color: 'var(--text-subtle)' }}>
+                                        تاريخ التعيين: {teacher.hire_date}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }
