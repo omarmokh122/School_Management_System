@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { fetchApi } from "@/lib/fetchApi"
 import { redirect } from "next/navigation"
 import { AddClassModal } from "./AddClassModal"
+import { EnrollStudentsModal } from "./EnrollStudentsModal"
 
 export default async function AcademicsPage() {
     const supabase = await createClient()
@@ -16,20 +17,35 @@ export default async function AcademicsPage() {
     const schoolId = user?.user_metadata?.school_id || '00000000-0000-0000-0000-000000000000'
     let classes: any[] = []
     let teachers: any[] = []
+    let allStudents: any[] = []
 
     try {
         if (userRole === "Admin" || userRole === "SuperAdmin") {
-            // Manager Holistic Matrix View
-            classes = await fetchApi('/classes/matrix') || []
-            // Fetch teachers for the Add Class Dropdown
+            classes = await fetchApi('/academic/classes/matrix') || []
             teachers = await fetchApi('/teachers/') || []
+            allStudents = await fetchApi('/students/') || []
         } else {
-            // Restricted Teacher View
-            classes = await fetchApi(`/classes/teacher/${user.id}`) || []
+            classes = await fetchApi(`/academic/classes/teacher/${user.id}`) || []
         }
     } catch (e: any) {
-        console.error("Failed to fetch classes:", e?.message || e)
+        console.error("Failed to fetch academics data:", e?.message || e)
     }
+
+    // Fetch enrolled student IDs for each class (Admin only)
+    let enrollmentMap: Record<string, string[]> = {}
+    if (userRole === "Admin" || userRole === "SuperAdmin") {
+        await Promise.all(
+            classes.map(async (cls: any) => {
+                try {
+                    const enrolled = await fetchApi(`/academic/enrollments/${cls.id}`) || []
+                    enrollmentMap[cls.id] = enrolled.map((s: any) => s.id)
+                } catch {
+                    enrollmentMap[cls.id] = []
+                }
+            })
+        )
+    }
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -50,7 +66,10 @@ export default async function AcademicsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {classes.length === 0 ? (
                     <div className="col-span-full rounded-2xl border border-dashed border-slate-300 p-12 text-center text-slate-500">
-                        لا توجد فصول دراسية متاحة.
+                        <div className="flex flex-col items-center gap-2">
+                            <span className="text-3xl">📚</span>
+                            <span>لا توجد فصول دراسية متاحة.</span>
+                        </div>
                     </div>
                 ) : null}
                 {classes.map((cls) => (
@@ -64,7 +83,10 @@ export default async function AcademicsPage() {
                                     </div>
                                 )}
                                 <div className="mt-2 flex items-center text-sm text-slate-500 gap-2">
-                                    <span className="flex items-center gap-1"><Users className="h-4 w-4" /> {cls.students_count || 0} طالباً</span>
+                                    <span className="flex items-center gap-1">
+                                        <Users className="h-4 w-4" />
+                                        {enrollmentMap[cls.id]?.length ?? cls.students_count ?? 0} طالباً
+                                    </span>
                                 </div>
                             </div>
                             <div className="h-10 w-10 rounded-full bg-indigo-50 flex flex-shrink-0 items-center justify-center">
@@ -73,9 +95,19 @@ export default async function AcademicsPage() {
                         </div>
 
                         <div className="mt-6 flex flex-wrap gap-2">
-                            <button className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors">
-                                <Users className="h-3.5 w-3.5" /> قائمة الطلاب
-                            </button>
+                            {(userRole === "Admin" || userRole === "SuperAdmin") ? (
+                                <EnrollStudentsModal
+                                    classId={cls.id}
+                                    className={cls.name}
+                                    schoolId={schoolId}
+                                    allStudents={allStudents}
+                                    enrolledStudentIds={enrollmentMap[cls.id] || []}
+                                />
+                            ) : (
+                                <button className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors">
+                                    <Users className="h-3.5 w-3.5" /> قائمة الطلاب
+                                </button>
+                            )}
                             <button className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 border border-indigo-100 hover:bg-indigo-100 transition-colors">
                                 <Upload className="h-3.5 w-3.5" /> المنهج الدراسي
                             </button>
@@ -102,7 +134,7 @@ export default async function AcademicsPage() {
                         <div className="text-center">
                             <FileText className="mx-auto h-12 w-12 text-slate-300" aria-hidden="true" />
                             <div className="mt-4 flex text-sm leading-6 text-slate-600">
-                                <label className="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500">
+                                <label className="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-none hover:text-indigo-500">
                                     <span>ارفع الملفات</span>
                                     <input id="file-upload" name="file-upload" type="file" className="sr-only" />
                                 </label>
@@ -135,14 +167,7 @@ export default async function AcademicsPage() {
                                 <option>مختلط</option>
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700">المادة المرجعية</label>
-                            <select className="mt-1 block w-full rounded-xl border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                                <option>المنهج الافتراضي للرياضيات (تم الرفع مسبقاً)</option>
-                                <option>الوحدة الأولى: الجبر</option>
-                            </select>
-                        </div>
-                        <button type="button" className="w-full flex justify-center items-center gap-2 rounded-xl bg-slate-900 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 transition-colors">
+                        <button type="button" className="w-full flex justify-center items-center gap-2 rounded-xl bg-slate-900 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 transition-colors">
                             <CheckCircle2 className="h-4 w-4" />
                             توليد وحفظ الاختبار
                         </button>

@@ -66,6 +66,18 @@ async def enroll_students(
     await crud_academic.enroll_students(db, tenant_uuid, enrollment_in.class_id, enrollment_in.student_ids)
     return {"status": "success", "message": f"Enrolled {len(enrollment_in.student_ids)} students"}
 
+@router.get("/enrollments/{class_id}")
+async def get_class_students(
+    class_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    school_id: str = Depends(dependencies.get_current_tenant),
+    _ = Depends(dependencies.require_role(["Admin", "Teacher"]))
+):
+    """Get all students enrolled in a class."""
+    tenant_uuid = validate_school_id(school_id)
+    students = await crud_academic.get_students_in_class(db, school_id=tenant_uuid, class_id=class_id)
+    return students
+
 # -- Curriculums --
 @router.post("/curriculum", response_model=schemas.CurriculumResponse)
 async def upload_curriculum(

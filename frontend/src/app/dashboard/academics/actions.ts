@@ -13,3 +13,19 @@ export async function createClass(payload: any) {
         return { success: false, error: error.message || 'Error creating class' }
     }
 }
+
+export async function enrollStudents(payload: {
+    class_id: string
+    student_ids: string[]
+    school_id: string
+}) {
+    try {
+        const response = await fetchApi('/academic/enrollments', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        })
+        return { success: true, data: response }
+    } catch (error: any) {
+        return { success: false, error: error.message || 'Error enrolling students' }
+    }
+}

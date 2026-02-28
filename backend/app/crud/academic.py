@@ -6,6 +6,7 @@ from sqlalchemy import func
 from app.models.academic import Class, ClassEnrollment, Curriculum, Assessment, Grade
 from app.models.teacher import Teacher
 from app.models.user import User
+from app.models.student import Student
 from app.schemas.academic import ClassCreate, CurriculumCreate, AssessmentCreate, GradeCreate
 
 class CRUDAcademic:
@@ -66,6 +67,42 @@ class CRUDAcademic:
             db.add(enrollment)
         await db.commit()
         return True
+
+    async def get_students_in_class(self, db: AsyncSession, school_id: UUID, class_id: UUID):
+        """Get all students enrolled in a class with their profile details."""
+        stmt = (
+            select(
+                Student.id,
+                Student.first_name,
+                Student.last_name,
+                Student.grade,
+                Student.section,
+                Student.email,
+                Student.phone,
+                Student.enrollment_date,
+            )
+            .select_from(ClassEnrollment)
+            .join(Student, ClassEnrollment.student_id == Student.id)
+            .filter(
+                ClassEnrollment.class_id == class_id,
+                ClassEnrollment.school_id == school_id
+            )
+        )
+        result = await db.execute(stmt)
+        rows = result.all()
+        return [
+            {
+                "id": str(row.id),
+                "first_name": row.first_name,
+                "last_name": row.last_name,
+                "grade": row.grade,
+                "section": row.section,
+                "email": row.email,
+                "phone": row.phone,
+                "enrollment_date": str(row.enrollment_date) if row.enrollment_date else None,
+            }
+            for row in rows
+        ]
 
     # -- Curriculum --
     async def create_curriculum(self, db: AsyncSession, obj_in: CurriculumCreate) -> Curriculum:
