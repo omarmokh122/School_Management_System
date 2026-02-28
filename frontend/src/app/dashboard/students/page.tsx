@@ -1,8 +1,9 @@
-import { MoreVertical, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { fetchApi } from "@/lib/fetchApi"
 import { redirect } from "next/navigation"
 import { AddStudentModal } from "./AddStudentModal"
+import { StudentEditModal } from "./StudentEditModal"
 
 export default async function StudentsPage() {
     const supabase = await createClient()
@@ -90,9 +91,7 @@ export default async function StudentsPage() {
                                     <td className="whitespace-nowrap px-3 py-3 text-slate-500">{student.phone || '—'}</td>
                                     <td className="whitespace-nowrap px-3 py-3 text-slate-500">{student.enrollment_date || '—'}</td>
                                     <td className="whitespace-nowrap py-3 pl-4 pr-3 text-left">
-                                        <button className="text-slate-300 hover:text-blue-600 transition-colors">
-                                            <MoreVertical className="h-4 w-4" />
-                                        </button>
+                                        <StudentEditModal student={student} />
                                     </td>
                                 </tr>
                             ))}
