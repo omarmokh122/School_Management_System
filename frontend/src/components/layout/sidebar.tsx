@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import {
     LayoutDashboard, Users, GraduationCap, Wallet,
     BookOpen, Settings, LogOut, Sparkles, School, ChevronLeft,
-    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar, FileBarChart
+    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar, FileBarChart, BrainCircuit
 } from "lucide-react"
 
 const SECTIONS = [
@@ -26,6 +26,7 @@ const SECTIONS = [
             { name: "دفتر الدرجات", href: "/dashboard/gradebook", icon: BookMarked },
             { name: "التقويم المدرسي", href: "/dashboard/calendar", icon: Calendar },
             { name: "الإعلانات", href: "/dashboard/announcements", icon: Megaphone },
+            { name: "أدوات الذكاء الاصطناعي", href: "/dashboard/teacher-tools", icon: BrainCircuit },
         ]
     },
     {
@@ -39,7 +40,7 @@ const SECTIONS = [
     },
 ]
 
-const TEACHER_HIDDEN = ["الطلاب", "المعلمون", "أدوات المدير", "المالية"]
+const TEACHER_HIDDEN = ["الطلاب", "المعلمون", "أدوات المدير", "المالية", "التقارير"]
 
 export function Sidebar({ userRole }: { userRole: string }) {
     const pathname = usePathname()
