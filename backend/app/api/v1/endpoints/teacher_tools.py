@@ -13,6 +13,22 @@ def get_openai_client():
     return openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 
+def _curriculum_section(curriculum_context: str | None) -> str:
+    """Build a curriculum reference block to prepend to any prompt."""
+    if not curriculum_context:
+        return ""
+    # Truncate to ~3000 chars to stay within token limits
+    truncated = curriculum_context[:3000]
+    if len(curriculum_context) > 3000:
+        truncated += "\n... [تم اختصار المنهج]"
+    return f"""
+--- المنهج الدراسي المرفوع ---
+{truncated}
+--- نهاية المنهج ---
+
+بناءً على المنهج الدراسي أعلاه، """
+
+
 PROMPTS = {
     "lesson_plan": lambda r: f"""
 أنت معلم خبير ومتخصص في إعداد خطط الدروس. قم بإنشاء خطة درس احترافية وشاملة باللغة العربية.

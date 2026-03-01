@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { TeacherAITools } from "./TeacherAITools"
+import { fetchApi } from "@/lib/fetchApi"
 import { BrainCircuit } from "lucide-react"
 
 export default async function TeacherToolsPage() {
@@ -9,8 +10,10 @@ export default async function TeacherToolsPage() {
     if (!user) redirect('/login')
 
     const role = user?.user_metadata?.role || "Teacher"
-    // Not accessible to students
     if (role === "Student") redirect('/dashboard')
+
+    // Fetch classes available to this teacher
+    const classes: any[] = await fetchApi('/academic/classes').catch(() => [])
 
     return (
         <div className="space-y-6 page-enter">
@@ -20,10 +23,11 @@ export default async function TeacherToolsPage() {
                 </div>
                 <div>
                     <h1 className="section-title">أدوات الذكاء الاصطناعي للمعلم</h1>
-                    <p className="section-sub">أدوات ذكية لتوفير وقتك وتحسين جودة التعليم</p>
+                    <p className="section-sub">اختر مادتك، ارفع المنهج، وولّد المحتوى تلقائياً</p>
                 </div>
             </div>
-            <TeacherAITools />
+            <TeacherAITools classes={classes} />
         </div>
     )
 }
+
