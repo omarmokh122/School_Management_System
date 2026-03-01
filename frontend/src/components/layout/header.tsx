@@ -14,29 +14,30 @@ interface Props {
 
 export function Header({ userName, userRole, userInitial, students, finance, announcements }: Props) {
     return (
-        <header className="flex h-16 shrink-0 items-center gap-4 border-b border-gray-200 bg-white px-6 sticky top-0 z-40 shadow-sm no-print">
+        <header className="flex h-16 shrink-0 items-center gap-4 border-b bg-white px-6 sticky top-0 z-40 shadow-sm no-print" style={{ borderColor: 'var(--border)' }}>
             {/* Search */}
             <div className="relative flex-1 max-w-xs">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: 'var(--text-subtle)' }} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none" style={{ color: 'var(--text-subtle)' }} />
                 <input
                     type="text"
-                    placeholder="ابحث عن طالب، معلم..."
-                    className="w-full h-9 rounded-lg border border-gray-200 pr-9 pl-4 text-sm outline-none transition-all"
-                    style={{ background: '#F9FAFB', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+                    placeholder="Search students, teachers..."
+                    className="w-full h-9 rounded-lg border pl-9 pr-4 text-sm outline-none transition-all"
+                    style={{ borderColor: 'var(--border)', background: 'var(--surface-alt)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
                     onFocus={e => {
-                        (e.target as HTMLElement).style.borderColor = 'var(--blue-primary)'
+                        (e.target as HTMLElement).style.borderColor = 'var(--accent)'
                             ; (e.target as HTMLElement).style.background = '#fff'
-                            ; (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(0,86,210,.12)'
+                            ; (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(79,70,229,.12)'
                     }}
                     onBlur={e => {
-                        (e.target as HTMLElement).style.borderColor = '#E5E7EB'
-                            ; (e.target as HTMLElement).style.background = '#F9FAFB'
+                        (e.target as HTMLElement).style.borderColor = 'var(--border)'
+                            ; (e.target as HTMLElement).style.background = 'var(--surface-alt)'
                             ; (e.target as HTMLElement).style.boxShadow = 'none'
                     }}
                 />
             </div>
 
             <div className="flex-1" />
+
 
             <div className="flex items-center gap-2">
                 {/* Smart Notification Bell */}

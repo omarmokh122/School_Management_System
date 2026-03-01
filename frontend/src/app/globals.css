@@ -2,23 +2,50 @@
 
 /* ── Color tokens ── */
 :root {
-  --blue-primary: #0056D2;
-  /* Coursera blue */
-  --blue-light: #E8F1FF;
-  --blue-hover: #0047B0;
+  /* Brand */
+  --accent: #4F46E5;
+  /* indigo-600 */
+  --accent-hover: #4338CA;
+  /* indigo-700 */
+  --accent-light: #EEF2FF;
+  /* indigo-50  */
+
+  /* Surface */
   --surface: #FFFFFF;
-  --surface-alt: #F8F9FA;
-  --border: #E5E7EB;
-  --text-primary: #1F2937;
-  --text-muted: #6B7280;
-  --text-subtle: #9CA3AF;
+  --surface-alt: #F8FAFC;
+  --border: #E2E8F0;
+
+  /* Text */
+  --text-primary: #0F172A;
+  /* slate-900 */
+  --text-muted: #64748B;
+  /* slate-500 */
+  --text-subtle: #94A3B8;
+  /* slate-400 */
+
+  /* Status */
   --success: #059669;
   --warning: #D97706;
   --danger: #DC2626;
-  --radius-card: 14px;
+
+  /* Sidebar (dark navy) */
+  --sidebar-bg: #1E1B4B;
+  /* indigo-950 */
+  --sidebar-border: rgba(255, 255, 255, .08);
+  --sidebar-text: #E2E8F0;
+  --sidebar-muted: #94A3B8;
+  --sidebar-hover: rgba(255, 255, 255, .07);
+
+  /* Legacy aliases — keep for compatibility */
+  --blue-primary: var(--accent);
+  --blue-light: var(--accent-light);
+  --blue-hover: var(--accent-hover);
+
+  /* Radius & shadow */
+  --radius-card: 12px;
   --radius-btn: 8px;
-  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / .08), 0 1px 2px -1px rgb(0 0 0 / .05);
-  --shadow-hover: 0 4px 12px 0 rgb(0 0 0 / .10), 0 2px 6px -2px rgb(0 0 0 / .06);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / .07), 0 1px 2px -1px rgb(0 0 0 / .04);
+  --shadow-hover: 0 4px 12px 0 rgb(0 0 0 / .09), 0 2px 6px -2px rgb(0 0 0 / .05);
 }
 
 * {
@@ -32,10 +59,12 @@ html {
 body {
   background: var(--surface-alt);
   color: var(--text-primary);
-  font-family: var(--font-noto-kufi), 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
+
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
@@ -48,12 +77,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
+  background: #CBD5E1;
   border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9CA3AF;
+  background: #94A3B8;
 }
 
 /* ── Card ── */
@@ -210,7 +239,7 @@ body {
 
 .data-table thead th {
   padding: 0.75rem 1rem;
-  text-align: right;
+  text-align: left;
   font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;

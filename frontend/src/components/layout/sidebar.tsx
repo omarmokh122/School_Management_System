@@ -1,123 +1,144 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
     LayoutDashboard, Users, GraduationCap, Wallet,
-    BookOpen, Settings, LogOut, Sparkles, School, ChevronLeft,
-    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar, FileBarChart, BrainCircuit, Zap
+    Settings, LogOut, School, BrainCircuit,
+    FileBarChart, CalendarDays, Megaphone, Zap
 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
-const SECTIONS = [
-    {
-        label: 'الرئيسية',
-        items: [
-            { name: "الرئيسية", href: "/dashboard", icon: LayoutDashboard },
-            { name: "الطلاب", href: "/dashboard/students", icon: Users },
-            { name: "المعلمون", href: "/dashboard/teachers", icon: GraduationCap },
-            { name: "البوابة الأكاديمية", href: "/dashboard/academics", icon: BookOpen },
-        ]
-    },
-    {
-        label: 'إدارة الصف',
-        items: [
-            { name: "الجدول الدراسي", href: "/dashboard/schedule", icon: CalendarDays },
-            { name: "الحضور والغياب", href: "/dashboard/attendance", icon: ClipboardList },
-            { name: "دفتر الدرجات", href: "/dashboard/gradebook", icon: BookMarked },
-            { name: "التقويم المدرسي", href: "/dashboard/calendar", icon: Calendar },
-            { name: "الإعلانات", href: "/dashboard/announcements", icon: Megaphone },
-            { name: "أدوات الذكاء الاصطناعي", href: "/dashboard/teacher-tools", icon: BrainCircuit },
-        ]
-    },
-    {
-        label: 'الإدارة',
-        items: [
-            { name: "أدوات المدير", href: "/dashboard/manager-tools", icon: Sparkles },
-            { name: "ذكاء إداري", href: "/dashboard/admin-tools", icon: Zap },
-            { name: "المالية", href: "/dashboard/finance", icon: Wallet },
-            { name: "التقارير", href: "/dashboard/reports", icon: FileBarChart },
-            { name: "الإعدادات", href: "/dashboard/settings", icon: Settings },
-        ]
-    },
+// ── Navigation items (flat, no sections) ────────────────────────
+const NAV_ITEMS = [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["Admin", "SuperAdmin", "Teacher"] },
+    { name: "Students", href: "/dashboard/students", icon: Users, roles: ["Admin", "SuperAdmin"] },
+    { name: "Teachers", href: "/dashboard/teachers", icon: GraduationCap, roles: ["Admin", "SuperAdmin"] },
+    { name: "Academics", href: "/dashboard/academics", icon: School, roles: ["Admin", "SuperAdmin", "Teacher"] },
+    { name: "Schedule", href: "/dashboard/schedule", icon: CalendarDays, roles: ["Admin", "SuperAdmin", "Teacher"] },
+    { name: "Announcements", href: "/dashboard/announcements", icon: Megaphone, roles: ["Admin", "SuperAdmin", "Teacher"] },
+    { name: "Finance", href: "/dashboard/finance", icon: Wallet, roles: ["Admin", "SuperAdmin"] },
+    { name: "Reports", href: "/dashboard/reports", icon: FileBarChart, roles: ["Admin", "SuperAdmin"] },
+    { name: "AI Tools", href: "/dashboard/teacher-tools", icon: BrainCircuit, roles: ["Teacher"] },
+    { name: "Admin AI", href: "/dashboard/admin-tools", icon: Zap, roles: ["Admin", "SuperAdmin"] },
+    { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["Admin", "SuperAdmin", "Teacher"] },
 ]
 
-const TEACHER_HIDDEN = ["الطلاب", "المعلمون", "أدوات المدير", "ذكاء إداري", "المالية", "التقارير"]
-
-export function Sidebar({ userRole }: { userRole: string }) {
+export function Sidebar({ userRole, userName, userInitial }: { userRole: string; userName?: string; userInitial?: string }) {
     const pathname = usePathname()
+    const router = useRouter()
+    const supabase = createClient()
+
+    const handleSignOut = async () => {
+        await supabase.auth.signOut()
+        router.push('/login')
+    }
+
+    const visibleItems = NAV_ITEMS.filter(item => item.roles.includes(userRole))
 
     return (
-        <aside style={{ width: 240, flexShrink: 0 }} className="flex flex-col h-full bg-white border-l border-gray-200">
+        <aside style={{
+            width: 232,
+            flexShrink: 0,
+            background: 'var(--sidebar-bg)',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100vh',
+            overflow: 'hidden',  // NO scroll ever
+        }}>
             {/* Logo */}
-            <div className="flex items-center gap-3 h-16 px-5 border-b border-gray-100">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'var(--blue-primary)' }}>
-                    <School className="h-5 w-5 text-white" />
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                height: 64, padding: '0 20px',
+                borderBottom: '1px solid var(--sidebar-border)',
+                flexShrink: 0,
+            }}>
+                <div style={{
+                    height: 34, width: 34, borderRadius: 10, flexShrink: 0,
+                    background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <School style={{ height: 18, width: 18, color: '#fff' }} />
                 </div>
-                <div className="leading-tight">
-                    <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>إدارة المدرسة</p>
-                    <p className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>EduSmart Platform</p>
+                <div>
+                    <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--sidebar-text)', letterSpacing: '-0.01em' }}>EduSmart</p>
+                    <p style={{ fontSize: '0.6875rem', color: 'var(--sidebar-muted)', marginTop: 1 }}>School Platform</p>
                 </div>
             </div>
 
-            {/* Nav */}
-            <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
-                {SECTIONS.map(section => {
-                    const visibleItems = section.items.filter(item =>
-                        !(userRole === "Teacher" && TEACHER_HIDDEN.includes(item.name))
-                    )
-                    if (visibleItems.length === 0) return null
+            {/* Nav — fills remaining space, no scroll */}
+            <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 1, overflow: 'hidden' }}>
+                {visibleItems.map(item => {
+                    const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
                     return (
-                        <div key={section.label}>
-                            <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-subtle)' }}>
-                                {section.label}
-                            </p>
-                            <div className="space-y-0.5">
-                                {visibleItems.map(item => {
-                                    const active = pathname === item.href
-                                    return (
-                                        <Link
-                                            key={item.name}
-                                            href={item.href}
-                                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150"
-                                            style={{
-                                                background: active ? 'var(--blue-light)' : 'transparent',
-                                                color: active ? 'var(--blue-primary)' : 'var(--text-muted)',
-                                                fontWeight: active ? '700' : '500',
-                                            }}
-                                            onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = '#F9FAFB'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' } }}
-                                            onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)' } }}
-                                        >
-                                            <item.icon className="h-4 w-4 flex-shrink-0" />
-                                            <span className="flex-1">{item.name}</span>
-                                            {active && <ChevronLeft className="h-3.5 w-3.5 opacity-60" />}
-                                        </Link>
-                                    )
-                                })}
-                            </div>
-                        </div>
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 10,
+                                padding: '8px 12px', borderRadius: 8,
+                                fontSize: '0.8125rem', fontWeight: isActive ? 600 : 500,
+                                color: isActive ? '#fff' : 'var(--sidebar-muted)',
+                                background: isActive ? 'var(--accent)' : 'transparent',
+                                textDecoration: 'none', transition: 'all .15s',
+                                flexShrink: 0,
+                            }}
+                            onMouseEnter={e => {
+                                if (!isActive) {
+                                    (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover)'
+                                        ; (e.currentTarget as HTMLElement).style.color = 'var(--sidebar-text)'
+                                }
+                            }}
+                            onMouseLeave={e => {
+                                if (!isActive) {
+                                    (e.currentTarget as HTMLElement).style.background = 'transparent'
+                                        ; (e.currentTarget as HTMLElement).style.color = 'var(--sidebar-muted)'
+                                }
+                            }}
+                        >
+                            <item.icon style={{ height: 15, width: 15, flexShrink: 0 }} />
+                            <span style={{ flex: 1 }}>{item.name}</span>
+                        </Link>
                     )
                 })}
             </nav>
 
-            {/* Footer */}
-            <div className="border-t border-gray-100 p-3 space-y-0.5">
-                <div className="flex items-center gap-3 rounded-lg px-3 py-2.5 mb-1" style={{ background: '#F9FAFB' }}>
-                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: 'var(--blue-primary)' }}>م</div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>مدير النظام</p>
-                        <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{userRole}</p>
+            {/* Footer — user + sign out */}
+            <div style={{ padding: '10px', borderTop: '1px solid var(--sidebar-border)', flexShrink: 0 }}>
+                <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 12px', borderRadius: 8,
+                    background: 'var(--sidebar-hover)', marginBottom: 4
+                }}>
+                    <div style={{
+                        height: 28, width: 28, borderRadius: '50%',
+                        background: 'var(--accent)', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.6875rem', fontWeight: 700, color: '#fff'
+                    }}>
+                        {userInitial || 'A'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--sidebar-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {userName || 'Admin'}
+                        </p>
+                        <p style={{ fontSize: '0.625rem', color: 'var(--sidebar-muted)', marginTop: 1 }}>{userRole}</p>
                     </div>
                 </div>
-                <Link
-                    href="/login"
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                    style={{ color: 'var(--danger)' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#FEF2F2'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
+                <button
+                    onClick={handleSignOut}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        width: '100%', padding: '8px 12px', borderRadius: 8,
+                        fontSize: '0.8125rem', fontWeight: 500, color: '#F87171',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        transition: 'background .15s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,.1)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}
                 >
-                    <LogOut className="h-4 w-4 flex-shrink-0" />
-                    تسجيل الخروج
-                </Link>
+                    <LogOut style={{ height: 14, width: 14, flexShrink: 0 }} />
+                    Sign Out
+                </button>
             </div>
         </aside>
     )

@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Noto_Kufi_Arabic } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const notoKufi = Noto_Kufi_Arabic({
-  variable: "--font-noto-kufi",
-  subsets: ["arabic"],
-  weight: ["300", "400", "500", "600", "700"],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "School Management SaaS",
-  description: "Modern, scalable multitenant school management system.",
+  title: "EduSmart — School Management",
+  description: "Modern, scalable school management platform.",
 };
 
 export default function RootLayout({
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className={`${notoKufi.variable} font-sans antialiased bg-gray-50 text-slate-800`}>
+    <html lang="en" dir="ltr">
+      <body className={`${inter.variable} antialiased`}>
         {children}
       </body>
     </html>
