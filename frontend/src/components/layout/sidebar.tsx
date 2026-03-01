@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import {
     LayoutDashboard, Users, GraduationCap, Wallet,
     BookOpen, Settings, LogOut, Sparkles, School, ChevronLeft,
-    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar, FileBarChart, BrainCircuit
+    CalendarDays, ClipboardList, Megaphone, BookMarked, Calendar, FileBarChart, BrainCircuit, Zap
 } from "lucide-react"
 
 const SECTIONS = [
@@ -33,6 +33,7 @@ const SECTIONS = [
         label: 'الإدارة',
         items: [
             { name: "أدوات المدير", href: "/dashboard/manager-tools", icon: Sparkles },
+            { name: "ذكاء إداري", href: "/dashboard/admin-tools", icon: Zap },
             { name: "المالية", href: "/dashboard/finance", icon: Wallet },
             { name: "التقارير", href: "/dashboard/reports", icon: FileBarChart },
             { name: "الإعدادات", href: "/dashboard/settings", icon: Settings },
@@ -40,7 +41,7 @@ const SECTIONS = [
     },
 ]
 
-const TEACHER_HIDDEN = ["الطلاب", "المعلمون", "أدوات المدير", "المالية", "التقارير"]
+const TEACHER_HIDDEN = ["الطلاب", "المعلمون", "أدوات المدير", "ذكاء إداري", "المالية", "التقارير"]
 
 export function Sidebar({ userRole }: { userRole: string }) {
     const pathname = usePathname()
