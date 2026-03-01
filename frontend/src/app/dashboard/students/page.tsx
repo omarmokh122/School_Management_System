@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { fetchApi } from "@/lib/fetchApi"
 import { redirect } from "next/navigation"
 import { AddStudentModal } from "./AddStudentModal"
+import { BulkImportModal } from "./BulkImportModal"
 import { StudentEditModal } from "./StudentEditModal"
 import Link from "next/link"
 import { Search, Download, Users, Eye } from "lucide-react"
@@ -34,6 +35,7 @@ export default async function StudentsPage() {
                         <Download className="h-4 w-4" />
                         تصدير
                     </button>
+                    <BulkImportModal schoolId={schoolId} />
                     <AddStudentModal schoolId={schoolId} />
                 </div>
             </div>
