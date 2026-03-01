@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from app.api import dependencies
 from app.schemas.teacher_tools import TeacherToolRequest, TeacherToolResponse
 from app.core.config import settings
@@ -13,7 +14,7 @@ def get_openai_client():
     return openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
 
-def _curriculum_section(curriculum_context: str | None) -> str:
+def _curriculum_section(curriculum_context: Optional[str]) -> str:
     """Build a curriculum reference block to prepend to any prompt."""
     if not curriculum_context:
         return ""
