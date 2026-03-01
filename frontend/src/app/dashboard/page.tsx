@@ -1,6 +1,6 @@
 import { Users, GraduationCap, Wallet, BookOpen, TrendingUp, TrendingDown, ArrowUpRight, CheckCircle2, Clock, AlertCircle, CalendarDays } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
-import { fetchApi } from "@/lib/fetchApi"
+import { fetchApiCached } from "@/lib/fetchApi"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 
@@ -83,14 +83,14 @@ export default async function DashboardPage() {
     let students: any[] = [], teachers: any[] = [], finances: any[] = [], classes: any[] = [], announcements: any[] = [], events: any[] = []
     try {
         [students, teachers, finances, classes, announcements] = await Promise.all([
-            fetchApi('/students/').catch(() => []),
-            fetchApi('/teachers/').catch(() => []),
-            fetchApi('/finance/').catch(() => []),
-            fetchApi('/academic/classes/matrix').catch(() => []),
-            fetchApi('/announcements/').catch(() => []),
+            fetchApiCached('/students/', 30).then(d => d || []),
+            fetchApiCached('/teachers/', 30).then(d => d || []),
+            fetchApiCached('/finance/', 30).then(d => d || []),
+            fetchApiCached('/academic/classes/matrix', 60).then(d => d || []),
+            fetchApiCached('/announcements/', 60).then(d => d || []),
         ])
         const now = new Date()
-        events = await fetchApi(`/calendar/?year=${now.getFullYear()}&month=${now.getMonth() + 1}`).catch(() => [])
+        events = await fetchApiCached(`/calendar/?year=${now.getFullYear()}&month=${now.getMonth() + 1}`, 60).then(d => d || [])
     } catch { }
 
     // Financial calculations
